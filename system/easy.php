@@ -101,8 +101,8 @@ class easy{
         }
     }
     public function start(){
-        $this->back();
-        $this->init();
+		$this->init();
+		$this->back();
         $this->forkServer();
         $this->monitorServer();
     }

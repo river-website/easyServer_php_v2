@@ -83,14 +83,14 @@ class ezServer{
     }
     public function start(){
         set_error_handler(array($this,'errorHandle'));
-        $this->initDir();
+        $this->init();
         $this->createSocket();
         $this->forks();
         $this->monitorWorkers();
     }
-    private function initDir(){
-        if(!is_dir($this->runTimePath))
-            mkdir($this->runTimePath);
+    private function init(){
+		$logPath = substr($this->runTimePath.$this->logFile,0,strripos($this->runTimePath.$this->logFile,'/'));
+        if(!is_dir($logPath)) mkdir($logPath,0777,true);
     }
     private function createSocket(){
     	if(!empty($this->serverData['host']))$this->host = $this->serverData['host'];
