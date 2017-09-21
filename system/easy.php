@@ -102,6 +102,7 @@ class easy{
     }
     public function start(){
         $this->back();
+        $this->init();
         $this->forkServer();
         $this->monitorServer();
     }
@@ -110,6 +111,9 @@ class easy{
         if($pid > 0)exit();
         self::addPid('main',getmypid());
     }
+    private function init(){
+    	file_put_contents(self::$pidsPath,null);
+	}
     private function forkServer(){
         $pid = pcntl_fork();
         if($pid == 0) {
