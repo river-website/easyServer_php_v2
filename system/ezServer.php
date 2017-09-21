@@ -158,14 +158,16 @@ class ezServer{
             easy::killPids($killList);
             if(easy::checkExitPid($exitPid))$this->forkOne();
         }
-        else if(strpos("debug+",$status) !== false) {
-            $time = time()-substr($status, strpos("debug+", $status));
+        else if(strpos($status,"debug+") !== false) {
+            $time = explode('+',$status);
+            if(!isset($time[1]))$time = time()-30;
+			else $time = time()-$time[1];
             $killList = array();
 			$pids = easy::getPids();
 			if(empty($pids['work'])||count($pids['work'])==0)$this->forks();
 			else{
 				foreach ($pids['work'] as $pidData) {
-					if($pidData['time']<$time)
+					if(strtotime($pidData['time'])<$time)
 						$killList[] = $pidData['pid'];
 				}
 				easy::killPids($killList);
