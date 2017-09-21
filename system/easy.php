@@ -114,10 +114,10 @@ class easy{
         $pid = pcntl_fork();
         if($pid == 0) {
             self::addPid('server',getmypid());
-            // 加载server文件
+            // load server file
             $serverPath = $this->server.'.php';
             require $serverPath;
-            // 启动server
+            // start server
             $server = new $this->server();
             $server->serverData = $this->serverData;
             $server->start();
@@ -135,16 +135,16 @@ class easy{
     private function checkServer($exitPid){
         $mainStatus = self::getPidState(getmypid());
         if($mainStatus === 'run'){
-            // 正常运行
+            // normal runing
             if(self::checkExitPid($exitPid))
                 $this->forkServer();
         }else if($mainStatus === 'stop'){
-            // 关闭所有（包括self）
+            // close all(self),del pids file
             self::killPids(array_keys(self::getChilds('main')));
             unlink(self::$pidsPath);
             exit();
         }else if($mainStatus === 'reload'){
-            // 关闭所有（不包括self） 重启server
+            // close all(no self),reload server
             self::killPids(array_keys(self::getChilds('main')));
             self::updatePid(getmypid(),'run');
             $this->forkServer();
