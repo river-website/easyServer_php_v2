@@ -15,6 +15,7 @@ class ezServer{
     public $workCount 		    = 1;
     public $host 				= 'tcp://0.0.0.0:80';
     public $protocol 			= null;
+	public $serverData			= null;
 
     // call back
     public $onMessage 			= null;
@@ -92,6 +93,7 @@ class ezServer{
             mkdir($this->runTimePath);
     }
     private function createSocket(){
+    	if(!empty($this->serverData['host']))$this->host = $this->serverData['host'];
         $this->serverSocket = stream_socket_server($this->host);
         if (!$this->serverSocket) {
             $this->log("error -> create server socket fail!");
