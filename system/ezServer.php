@@ -6,6 +6,22 @@
  * Time: 8:34
  */
 
+if (!function_exists('ezServer')) {
+	function ezServer(){
+		return ezServer::getInterface();
+	}
+}
+if (!function_exists('ezLog')) {
+	function ezLog($msg){
+		ezServer()->log($msg);
+	}
+}
+if (!function_exists('ezDebugLog')) {
+	function ezDebugLog($msg){
+		ezServer()->debugLog($msg);
+	}
+}
+
 class ezServer{
     // config
     public $debug				= true;
