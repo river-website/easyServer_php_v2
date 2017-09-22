@@ -7,7 +7,7 @@
  */
 require 'system/easy.php';
 $easy = new easy();
-$easy->server = 'ezServer';
-$serverData['host'] = 'tcp://0.0.0.0:80';
+$easy->server = 'ezWebServer';
+$serverData['host'] = '0.0.0.0:80';
 $easy->serverData = $serverData;
 $easy->start();

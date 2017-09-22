@@ -8,7 +8,7 @@
 if(!defined('ROOT'))define('ROOT', __DIR__.'/..');
 
 class easy{
-    static public $pidsPath			= ROOT.'/system/pids';
+    static public $pidsPath			= '/system/pids';
     static public $checkTime		= 1;
     public $server					= 'ezServer';
     public $serverData				= array();
@@ -112,6 +112,7 @@ class easy{
         self::addPid('main',getmypid());
     }
     private function init(){
+        self::$pidsPath = ROOT.self::$pidsPath;
     	file_put_contents(self::$pidsPath,null);
 	}
     private function forkServer(){

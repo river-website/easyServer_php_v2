@@ -65,6 +65,7 @@ class ezReactorLibEvent{
 			event_del($ev);
 			unset($this->allEvent[(int)$fd][$status]);
 		}
+		if(empty($this->allEvent[(int)$fd]))unset($this->allEvent[(int)$fd]);
 	}
 	// 开始监视资源
 	public function loop(){

@@ -5,6 +5,8 @@
  * Date: 2017/9/21
  * Time: 8:34
  */
+require ROOT.'/connect/ezTcp.php';
+require ROOT.'/reactor/ezReactor.php';
 
 if (!function_exists('ezServer')) {
 	function ezServer(){
@@ -26,7 +28,7 @@ class ezServer{
     // config
     public $debug				= true;
     public $log               	= true;
-    public $runTimePath       	= ROOT.'/runTime';
+    public $runTimePath       	= '/runTime';
     public $logFile           	= '/log/log-$date.log';
     public $workCount 		    = 1;
     public $host 				= 'tcp://0.0.0.0:80';
@@ -105,6 +107,7 @@ class ezServer{
         $this->monitorWorkers();
     }
     private function init(){
+        $this->runTimePath = ROOT.$this->runTimePath;
 		$logPath = substr($this->runTimePath.$this->logFile,0,strripos($this->runTimePath.$this->logFile,'/'));
         if(!is_dir($logPath)) mkdir($logPath,0777,true);
     }
@@ -129,8 +132,7 @@ class ezServer{
             easy::addPid('work',getmypid());
             $this->processName = 'work process';
             $this->myPid = getmypid();
-//            $this->reactor();
-			sleep(10000);
+            $this->reactor();
         }
         else $this->log("work pid: $pid");
     }
