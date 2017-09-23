@@ -124,7 +124,7 @@ class easy{
             require $serverPath;
             // start server
             $server = new $this->server();
-            $server->serverData = $this->serverData;
+            $server->setServerData($this->serverData);
             $server->start();
             exit();
         }
