@@ -50,7 +50,8 @@ class ezReactorLibEvent{
 				if (!event_set($event, $fd, $status | EV_PERSIST, $func, array($arg))) return false;
 				if (!event_base_set($event, $this->base)) return false;
 				if (!event_add($event)) return false;
-				$this->allEvent[(int)$fd][$status] = $event;
+//				$this->allEvent[(int)$fd][$status] = $event;
+                $this->allEvent[(int)$fd.$status] = $event;
 			}
 				break;
 			default:
@@ -60,12 +61,18 @@ class ezReactorLibEvent{
 	}
 	// 删除一个监视资源，状态及事件处理
 	public function del($fd, $status){
-		if(!empty($this->allEvent[(int)$fd][$status])) {
-			$ev = $this->allEvent[(int)$fd][$status];
+//		if(!empty($this->allEvent[(int)$fd][$status])) {
+//			$ev = $this->allEvent[(int)$fd][$status];
+//			event_del($ev);
+//			unset($this->allEvent[(int)$fd][$status]);
+//		}
+//		if(empty($this->allEvent[(int)$fd]))unset($this->allEvent[(int)$fd]);
+        $key = (int)$fd.$status;
+        if(!empty($this->allEvent[$key])){
+            $ev = $this->allEvent[$key];
 			event_del($ev);
-			unset($this->allEvent[(int)$fd][$status]);
-		}
-		if(empty($this->allEvent[(int)$fd]))unset($this->allEvent[(int)$fd]);
+			unset($this->allEvent[$key]);
+        }
 	}
 	// 开始监视资源
 	public function loop(){
