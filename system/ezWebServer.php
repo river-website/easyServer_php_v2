@@ -7,7 +7,7 @@
  */
 
 require ROOT.'/system/ezServer.php';
-//require ROOT.'/library/ezDbPool.php';
+require ROOT.'/library/ezDbPool.php';
 //require ROOT.'/library/ezQueueEvent.php';
 require ROOT.'/protocol/ezHttp.php';
 
@@ -26,7 +26,7 @@ class ezWebServer {
 			$this->serverRoot[$value['webSite']] = $value['path'];
 	}
 	public function onStart(){
-//		ezDb()->init();
+		ezDb()->init();
 //		ezQueue()->init();
 	}
 	public function start(){
