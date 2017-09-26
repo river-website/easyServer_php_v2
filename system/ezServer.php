@@ -286,7 +286,6 @@ class ezServer{
         }
         if($this->outScreen)
             echo "$msg<br>";
-        else
-            $this->log($msg);
+        $this->log($msg);
     }
 }
