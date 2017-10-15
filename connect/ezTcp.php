@@ -6,6 +6,17 @@
  * Time: 13:15
  */
 
+function getTrace(){
+	$array = debug_backtrace();
+	unset($array[0]);
+	$html = '';
+	foreach ($array as $row) {
+		if (isset($row['file']) && isset($row['line']) && isset($row['function']))
+			$html .= $row['file'] . ':' . $row['line'] . '行,调用方法:' . $row['function'] . "\n";
+	}
+	return $html;
+}
+
 class ezTcp{
 	public $onMessage 			= null;
 	public $onClose				= null;
@@ -70,13 +81,13 @@ class ezTcp{
 		ezReactorDel($this->socket,ezReactor::eventWrite);
 	}
 	// 发送数据
-	public function send($data){
+	public function send($data,$decode = true){
 		if(!$this->sendStatus){
 			$this->sendBuffer .= $data;
 			return;
 		}
 		$data = $this->sendBuffer.$data;
-		if(ezServer()->protocol)$data = ezServer()->protocol->encode($data,$this);
+		if($decode && ezServer()->protocol)$data = ezServer()->protocol->encode($data,$this);
 		$len = fwrite($this->socket,$data,8192);
 		if($len == strlen($data)) {
 			$this->sendBuffer = '';
@@ -96,7 +107,7 @@ class ezTcp{
 	//关闭当前连接
 	public function close($data = null, $raw = false){
 		if ($data !== null) $this->send($data);
-		if ($this->sendBuffer === '') $this->destroy();
+		if ($this->sendBuffer === '' && $this->sendStatus === true) $this->destroy();
 	}
 	// 析构当前连接
 	public function destroy()

@@ -413,7 +413,7 @@ class ezHttp
 	 */
 	public static function getMimeTypesFile()
 	{
-		return __DIR__ . '/Http/mime.types';
+		return __DIR__ . '/http/mime.types';
 	}
 
 	/**

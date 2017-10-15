@@ -19,7 +19,7 @@ if (!function_exists('ezDbExcute')) {
 
 class ezDbPool
 {
-    public $maxAsyncLinks = 0;
+    public $maxAsyncLinks = 10;
     public $dbPoolTime = 1;
     public $connectFunc = null;
 
@@ -80,7 +80,6 @@ class ezDbPool
                 if (empty($link)) {
                     $link = call_user_func($this->connectFunc);
                     $this->asyncLinks[] = $link;
-                    $this->freeAsyncLink[] = $link;
                     ezDebugLog("async link is: " . $this->linkToKey($link));
                 }
                 $linkKey = $this->linkToKey($link);
@@ -92,7 +91,9 @@ class ezDbPool
                 $this->syncLink = call_user_func($this->connectFunc);
                 ezDebugLog("sync link is: " . $this->linkToKey($this->syncLink));
             }
+            $time = microtime(true);
             $row = mysqli_query($this->syncLink, $sql);
+            ezDebugLog('run time:'.((microtime(true)-$time)*1000));
             if (is_object($row)) return $row->fetch_all(MYSQLI_ASSOC);
             else if ($row == true) return true;
             else {
@@ -135,14 +136,16 @@ class ezDbPool
                 $func = $linkInfo[0];
                 if (empty($func)) continue;
                 $socketCon = $linkInfo[1];
-                ezDebugLog($socketCon->getSocket());
+				ezDebugLog($socketCon->socket);
                 ezDebugLog($linkKey);
                 $socketCon->setImmedSend();
+				ezServer()->curConnect = $socketCon;
                 ob_start();
                 try {
                     call_user_func_array($func, array($linkData));
                 } catch (Exception $ex) {
-                    echo $ex;
+					ezLog($ex->getMessage());
+					echo $ex->getMessage();
                 }
                 $contents = ob_get_clean();
                 if (strtolower($socketCon->data['HTTP_CONNECTION']) === "keep-alive") {
