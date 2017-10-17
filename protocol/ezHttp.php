@@ -97,10 +97,10 @@ class ezHttp
 		);
 
 		// Parse headers.
-		list($http_header, $http_body) = explode("\r\n\r\n", $recv_buffer, 2);
+		@list($http_header, $http_body) = explode("\r\n\r\n", $recv_buffer, 2);
 		$header_data = explode("\r\n", $http_header);
 
-		list($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'], $_SERVER['SERVER_PROTOCOL']) = explode(' ', $header_data[0]);
+		@list($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'], $_SERVER['SERVER_PROTOCOL']) = explode(' ', $header_data[0]);
 
 		$http_post_boundary = '';
 		unset($header_data[0]);
@@ -108,7 +108,7 @@ class ezHttp
 			// \r\n\r\n
 			if (empty($content)) continue;
 
-			list($key, $value)	   = explode(':', $content, 2);
+			@list($key, $value)	   = explode(':', $content, 2);
 			$key					 = str_replace('-', '_', strtoupper($key));
 			$value				   = trim($value);
 			$_SERVER['HTTP_' . $key] = $value;
