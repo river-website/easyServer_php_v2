@@ -18,6 +18,8 @@ function getTrace(){
 }
 
 class ezTcp{
+    public static $maxPackageSize = 10485760;
+
 	public $onMessage 			= null;
 	public $onClose				= null;
 
@@ -26,6 +28,8 @@ class ezTcp{
 	private $sendBuffer 		= null;
 	private $sendStatus 		= true;
 	public $data				= null;
+    private $curPakgSize        = null;
+    private $readBuffer         = null;
 
 	public function __construct($socket,$remote_address){
 		$this->socket = $socket;
@@ -42,13 +46,31 @@ class ezTcp{
 	}
 	// 回调处理读准备好事件
 	public function onRead($socket){
-		$buffer = fread($socket, 65535);
+        $buffer = fread($socket, 65535);
 		// Check connection closed.
 		if ($buffer === '' || $buffer === false || !is_resource($socket)) {
 			$this->destroy();
 			return;
 		}
-		if(ezServer()->protocol) $buffer = ezServer()->protocol->decode($buffer,$this);
+		$this->readBuffer .= $buffer;
+		if(ezServer()->protocol){
+            if($this->curPakgSize){
+                if($this->curPakgSize > strlen($this->readBuffer))return;
+            }else{
+                $protocol = ezServer()->protocol;
+                $this->curPakgSize = $protocol::input($this->readBuffer,$this);
+                if($this->curPakgSize == 0)return;
+                else if($this->curPakgSize>0 && $this->curPakgSize <= self::$maxPackageSize){
+                    if($this->curPakgSize > strlen($this->readBuffer))return;
+                }
+                else{
+                    ezLog('error package. package_length=' . var_export($this->curPakgSize, true));
+                    $this->destroy();
+                    return;
+                }
+            }
+		    $buffer = ezServer()->protocol->decode($this->readBuffer,$this);
+        }
 		if($this->onMessage) {
 			try{
 				call_user_func_array($this->onMessage, array($this, $buffer));
