@@ -65,7 +65,10 @@ class ezDbPool
         return $link->thread_id;
     }
 
-    public function excute($sql, $func = null, $queEvent = false)
+    public function excute($sql, $func = null, $queEvent = false){
+        return new promise(array($this,'asyncExcute'),$sql);
+    }
+    public function asyncExcute($sql, $func = null, $queEvent = false)
     {
         if (!empty($func) || $queEvent) {
             $con = ezServer()->curConnect;

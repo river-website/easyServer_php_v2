@@ -289,3 +289,55 @@ class ezServer{
         $this->log($msg);
     }
 }
+
+class runG{
+    private $gFuncRet = array();
+    public function __construct($gFunc,$arg=null){
+        if(gettype($gFunc) == 'array')
+            $this->gFuncRet = call_user_func($gFunc,$arg);
+        else
+            $this->gFuncRet = $gFunc($arg);
+        if($this->gFuncRet instanceof Generator) {
+            $this->onRecvGRet($this->gFuncRet->current());
+        }
+    }
+    public function onRecvGRet($promiseRet){
+        if($promiseRet instanceof promise) {
+            $promiseRet->then(function ($result) {
+                $this->onRecvGRet($this->gFuncRet->send($result));
+            });
+        }
+    }
+}
+
+function runG($gFunc,$arg=null){
+    if(gettype($gFunc) == 'array')
+        $gFuncRet = call_user_func($gFunc,$arg);
+    else
+        $gFuncRet = $gFunc($arg);
+    if($gFuncRet instanceof Generator){
+        $onRecvGRet = function($promiseRet) use (&$onRecvGRet,$gFuncRet){
+            if($promiseRet instanceof promise) {
+                $promiseRet->then(function ($result) use ($onRecvGRet,$gFuncRet){
+                    $onRecvGRet($gFuncRet->send($result));
+                });
+            }
+        };
+        $onRecvGRet($gFuncRet->current());
+    }else
+        return $gFuncRet;
+
+}
+
+class promise{
+    private $callback = array();
+    public function then($func){
+        $this->callback = $func;
+        return $this;
+    }
+    public function __construct($asyncFunc,$request){
+        call_user_func($asyncFunc,$request,function($result){
+            call_user_func($this->callback,$result);
+        });
+    }
+}
