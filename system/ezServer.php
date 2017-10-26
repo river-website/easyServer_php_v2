@@ -294,7 +294,7 @@ class runG{
     private $gFuncRet = array();
     public function __construct($gFunc,$arg=null){
         if(gettype($gFunc) == 'array')
-            $this->gFuncRet = call_user_func($gFunc,$arg);
+            $this->gFuncRet = call_user_func_array($gFunc,$arg);
         else
             $this->gFuncRet = $gFunc($arg);
         if($this->gFuncRet instanceof Generator) {
@@ -312,7 +312,7 @@ class runG{
 
 function runG($gFunc,$arg=null){
     if(gettype($gFunc) == 'array')
-        $gFuncRet = call_user_func($gFunc,$arg);
+        $gFuncRet = call_user_func_array($gFunc,$arg);
     else
         $gFuncRet = $gFunc($arg);
     if($gFuncRet instanceof Generator){
@@ -330,14 +330,26 @@ function runG($gFunc,$arg=null){
 }
 
 class promise{
-    private $callback = array();
+    private $callbacks = array();
     public function then($func){
-        $this->callback = $func;
+        $this->callbacks[] = $func;
         return $this;
     }
     public function __construct($asyncFunc,$request){
         call_user_func($asyncFunc,$request,function($result){
-            call_user_func($this->callback,$result);
+            while (true) {
+                $callBack = array_shift($this->callbacks);
+                if(empty($callBack))break;
+                $ret = call_user_func($callBack, $result);
+                if($ret instanceof promise){
+                    while(true){
+                        $callBack = array_shift($this->callbacks);
+                        if(empty($callBack))break;
+                        $ret->then($callBack);
+                    }
+                    break;
+                }
+            }
         });
     }
 }
