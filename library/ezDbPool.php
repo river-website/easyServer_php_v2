@@ -19,7 +19,7 @@ if (!function_exists('ezDbExcute')) {
 
 class ezDbPool
 {
-    public $maxAsyncLinks = 10;
+    public $maxAsyncLinks = 4;
     public $dbPoolTime = 1;
     public $connectFunc = null;
 
@@ -81,7 +81,7 @@ class ezDbPool
             }
             $link = array_shift($this->freeAsyncLink);
             if (empty($link) && count($this->asyncLinks) >= $this->maxAsyncLinks)
-                $this->sqlList[] = array($sql, $func, $con);
+                $this->sqlList[] = array($sql, $func, $con,microtime(true));
             else {
                 if (empty($link)) {
                     $link = call_user_func($this->connectFunc);
@@ -90,7 +90,7 @@ class ezDbPool
                 }
                 $linkKey = $this->linkToKey($link);
                 $ret = mysqli_query($link, $sql, MYSQLI_ASYNC);
-                $this->linkKeys[$linkKey] = array($func, $con);
+                $this->linkKeys[$linkKey] = array($func, $con,microtime(true));
             }
         } else {
             if (empty($this->syncLink)) {
@@ -99,7 +99,7 @@ class ezDbPool
             }
             $time = microtime(true);
             $row = mysqli_query($this->syncLink, $sql);
-            ezDebugLog('run time:'.((microtime(true)-$time)*1000));
+            ezDebugLog('sync run time:'.((microtime(true)-$time)*1000));
             if (is_object($row)) return $row->fetch_all(MYSQLI_ASSOC);
             else if ($row == true) return true;
             else {
@@ -137,13 +137,14 @@ class ezDbPool
                 } else {
                     ezDebugLog("do sql que");
                     mysqli_query($link, $sqlInfo[0], MYSQLI_ASYNC);
-                    $this->linkKeys[$linkKey] = array($sqlInfo[1], $sqlInfo[2]);
+                    $this->linkKeys[$linkKey] = array($sqlInfo[1], $sqlInfo[2],$sqlInfo[3]);
                 }
                 $func = $linkInfo[0];
                 if (empty($func)) continue;
                 $socketCon = $linkInfo[1];
 				ezDebugLog($socketCon->socket);
                 ezDebugLog($linkKey);
+                ezDebugLog('async run time '.((microtime(true)-$linkInfo[2])*1000));
                 $socketCon->setImmedSend();
 				ezServer()->curConnect = $socketCon;
                 ob_start();
