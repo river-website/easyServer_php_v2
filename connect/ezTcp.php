@@ -37,12 +37,10 @@ class ezTcp{
 	}
 	public function getRemoteIp(){
 		$pos = strrpos($this->remote_address, ':');
-		if ($pos) return trim(substr($this->remote_address, 0, $pos), '[]');
-		return '';
+		return ($pos)?trim(substr($this->remote_address, 0, $pos), '[]'):'';
 	}
 	public function getRemotePort(){
-		if ($this->remote_address) return (int)substr(strrchr($this->remote_address, ':'), 1);
-		return 0;
+		return ($this->remote_address)? (int)substr(strrchr($this->remote_address, ':'), 1):0;
 	}
 	// 回调处理读准备好事件
 	public function onRead($socket){
